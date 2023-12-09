@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>元燒落單系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 10px auto;
+            width: 80%;
+            display: block;
+        }
+        #customize {
+            text-align: center;
+        }
+        .order-list {
+        list-style: none; /* Add this line */
+        padding-left: 0; /* Optionally remove padding */
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>元燒落單系統</h2>
+        <form id="orderForm">
+            <select id="foodOrder" onchange="handleFoodOrderChange()">
+                <option value="">選擇項目</option>
+                <option value="自選飯麵">自選飯麵</option>
+                <option value="招牌特濃番茄洋蔥湯">招牌特濃番茄洋蔥湯</option>
+                <!-- Add other food options here -->
+            </select>
+
+            <div id="customize" style="display: none;">
+                <p>揀三個餸：</p>
+                <select id="ingredient1">
+                    <option value="">第一個餸</option>
+                    <!-- Ingredient options -->
+                </select>
+                <select id="ingredient2">
+                    <option value="">第二個餸</option>
+                    <!-- Ingredient options -->
+                </select>
+                <select id="ingredient3">
+                    <option value="">第三個餸</option>
+                    <!-- Ingredient options -->
+                </select>
+                <p>湯底：</p>
+                <select id="broth">
+                    <option value="">選擇湯底</option>
+                    <option value="招牌特濃番茄洋蔥湯">招牌特濃番茄洋蔥湯</option>
+                    <option value="元燒川式麻辣湯">元燒川式麻辣湯</option>
+                    <option value="皇牌三重芝士撈">皇牌三重芝士撈</option>
+                    <!-- More broth options -->
+                </select>
+                <p>飯麵：</p>
+                <select id="riceNoodle" onchange="handleRiceNoodleChange()">
+                    <option value="">選擇飯麵</option>
+                    <option value="公仔麵">公仔麵</option>
+                    <option value="烏冬">烏冬</option>
+                    <option value="米線">米線</option>
+                    <option value="泰國香米">泰國香米</option>
+                    <option value="蒜辣炒飯">蒜辣炒飯</option>
+                    <option value="蒜辣炒公仔麵">蒜辣炒公仔麵</option>
+                    <option value="蒜辣炒烏冬">蒜辣炒烏冬</option>
+                    <option value="蒜蓉炒飯">蒜蓉炒飯</option>
+                    <option value="蒜蓉炒公仔麵">蒜蓉炒公仔麵</option>
+                    <option value="蒜蓉炒烏冬">蒜蓉炒烏冬</option>
+                    <!-- More rice/noodle options -->
+                </select>
+            </div>
+
+            <button type="submit">添加項目</button>
+        </form>
+        <ul id="orderStack" class="order-list">
+            <!-- Submitted orders will appear here -->
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('orderForm').onsubmit = function(event) {
+        event.preventDefault();
+
+        var foodOrderSelect = document.getElementById('foodOrder');
+        var ingredient1Select = document.getElementById('ingredient1');
+        var ingredient2Select = document.getElementById('ingredient2');
+        var ingredient3Select = document.getElementById('ingredient3');
+        var riceNoodleSelect = document.getElementById('riceNoodle');
+        var brothSelect = document.getElementById('broth');
+        var orderStack = document.getElementById('orderStack');
+
+        var foodOrder = foodOrderSelect.value;
+        var ingredient1 = ingredient1Select.value;
+        var ingredient2 = ingredient2Select.value;
+        var ingredient3 = ingredient3Select.value;
+        var riceNoodle = riceNoodleSelect.value;
+        var broth = brothSelect.value;
+
+        var price = prices[foodOrder] || 0; // Base price for the selected food item
+
+        if (foodOrder === '自選飯麵') {
+            // Custom order logic
+            if (!ingredient1 || !ingredient2 || !ingredient3) {
+                alert('請揀三個餸。');
+                return;
+            }
+            if (new Set([ingredient1, ingredient2, ingredient3]).size !== 3) {
+                alert('啲餸唔可以重覆。');
+                return;
+            }
+            // Define options that require extra charge
+            var extraChargeOptions = ['蒜辣炒飯', '蒜辣炒公仔麵', '蒜辣炒烏冬', '蒜蓉炒飯', '蒜蓉炒公仔麵', '蒜蓉炒烏冬', '元燒川式麻辣湯', '皇牌三重芝士撈'];
+
+            // Check if the rice/noodle or broth option has an extra charge
+            if (extraChargeOptions.includes(riceNoodle) || extraChargeOptions.includes(broth)) {
+                price += 12; // Add the extra charge
+            }
+
+            // Create the custom order text
+            var orderText = `${ingredient1}`+` ${ingredient2}`+` ${ingredient3}`+` ${broth}`+` ${riceNoodle}`;
+        } else {
+            // Standard order logic
+            var orderText = foodOrder;
+        }
+
+        // Create a new list item with order and price
+        var listItem = document.createElement('li');
+        listItem.textContent = `${orderText} $${price}`;
+        orderStack.appendChild(listItem);
+
+        // Reset form fields
+        foodOrderSelect.selectedIndex = 0;
+        ingredient1Select.selectedIndex = 0;
+        ingredient2Select.selectedIndex = 0;
+        ingredient3Select.selectedIndex = 0;
+        riceNoodleSelect.selectedIndex = 0;
+        brothSelect.selectedIndex = 0;
+        document.getElementById('customize').style.display = 'none';
+    };
+
+
+        function handleFoodOrderChange() {
+            var foodOrder = document.getElementById('foodOrder').value;
+            var customizationDiv = document.getElementById('customize');
+            customizationDiv.style.display = foodOrder === '自選飯麵' ? 'block' : 'none';
+        }
+
+        function handleRiceNoodleChange() {
+            var riceNoodleSelect = document.getElementById('riceNoodle');
+            var selectedRiceNoodle = riceNoodleSelect.value;
+            var brothSelect = document.getElementById('broth');
+            var noBrothRequiredOptions = ['蒜辣炒飯', '蒜辣炒公仔麵', '蒜辣炒烏冬', '蒜蓉炒飯', '蒜蓉炒公仔麵', '蒜蓉炒烏冬'];
+            brothSelect.disabled = noBrothRequiredOptions.includes(selectedRiceNoodle);
+            if (brothSelect.disabled) {
+                brothSelect.selectedIndex = 0; // Reset broth selection if disabled
+            }
+        }
+
+        var prices = {
+            "自選飯麵": 50,
+            "招牌特濃番茄洋蔥湯": 8
+            // Add other food items and their prices here
+        };
+
+        window.onload = function() {
+            var ingredients = ["雞翼", "雞脾", "腩肉", "牛栢葉", "鴨胸", "豬頸肉", "煙肉金菇", "多春魚", "午餐肉", "廚師腸", "雞腎", "豆卜", "冬菇", "粟米", "茄子", "蘿蔔", "時菜", "翠玉瓜", "牛丸", "芝心丸", "墨魚丸"];
+            var dropdowns = [document.getElementById('ingredient1'), document.getElementById('ingredient2'), document.getElementById('ingredient3')];
+            dropdowns.forEach(dropdown => {
+                ingredients.forEach(ingredient => {
+                    var option = document.createElement('option');
+                    option.value = ingredient;
+                    option.textContent = ingredient;
+                    dropdown.appendChild(option);
+                });
+            });
+        };
+
+    </script>
+</body>
+</html>
